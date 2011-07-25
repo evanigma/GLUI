@@ -1,0 +1,21 @@
+Libraries needed:
+OpenGL, Glut, SDL, SDL_mixer
+
+
+To compile GLWav on 
+
+Unix:
+
+g++ -s -O2 *.cpp -lglut -lGL -lSDL -lSDL_mixer -o GLWav
+
+
+
+Mac:
+
+g++ -O2 *.cpp /sw/lib/libSDLmain.a -framework SDL -framework SDL_mixer -framework OpenGL -framework GLUT -o GLWav
+
+
+
+Windows:
+
+g++ -s -O2 *.cpp -lmingw32 -lSDLmain -lSDL -lSDL_mixer -lopengl32 -lglut32 -lglu32 -o GLWav

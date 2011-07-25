@@ -19,6 +19,7 @@ GLWidget::GLWidget(QWidget* parent) : QGLWidget(parent)
     setEnabled(true);               //allow handling of keyboard and mouse events
     
 	visChoice = 0;                  //which visualization is running. Start with basic waveform
+	myWave = NULL;
 }
 
 void GLWidget::playNewSong(Wave* song)
@@ -132,7 +133,7 @@ void GLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT);                                    //actually clear the drawing window
     
-	if (myWave)
+    if (myWave)
 	{
         switch(visChoice)                                            //Reset display func for given vis choice
         {
@@ -164,8 +165,8 @@ void GLWidget::paintGL()
                 GLDisplayBasicWave();
         }
         
-		swapBuffers(); 
-	}                                                 
+		swapBuffers();
+	}                                                
 }
 
 void GLWidget::timerEvent(QTimerEvent *)
