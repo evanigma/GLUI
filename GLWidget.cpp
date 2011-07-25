@@ -1,10 +1,14 @@
+// GLWidget: Widget for visualizing sound data using OpenGL.
+// Summer 2009, Evan Fox and Doug Hogan
+
 #include "GLWidget.h"
 #include <math.h>
 #include <iostream>
 using namespace std; 
 
 GLWidget::GLWidget(QWidget* parent) : QGLWidget(parent)
-// !!!! This function is a mess. Most of this came from main in GLWav...
+// POST: GLWidget constructed, with line color set to medium blue, visualization set to basic 
+//       waveform, and with widget able to handle keyboard and mouse events.
 {	
 	red = 0.0;                      //red component of line color for drawing
 	green = double(0x88)/0xff;      //green component of line color for drawing
@@ -12,29 +16,36 @@ GLWidget::GLWidget(QWidget* parent) : QGLWidget(parent)
 	
     setEnabled(true);               //allow handling of keyboard and mouse events
     
-	visChoice = 6;                  //which visualization is running. Start with basic waveform
+	visChoice = 0;                  //which visualization is running. Start with basic waveform
 }
 
 void GLWidget::playNewSong(Wave* song)
+// PRE:  song is initialized
+// POST: GLWidget is set up to play song. numSamples is reset to allow for 0.005 seconds of data.
+//         sampleNumber and lastSampleNumber are reset to start of song values, 0 and -1, respectively.
+//         myTimer is started to allow visualization to synchronize with playback. Qt is set up so
+//         timerEvent acts as an idle function. 
 {
-	myWave = song;
+	myWave = song;                                      
 	
-	numSamples = myWave->GetSampleRate()*256/44100;      //for each frame, use 256 samples of data
+	numSamples = myWave->GetSampleRate()*256/44100;     //for each frame, use 256 samples of data
 														//corresponding to 0.005 seconds of audio
-	sampleNumber = 0;                                   //set up globals to track position in song from the start
+	sampleNumber = 0;                                   //set up variables to track position in song from the start
 	lastSampleNumber = -1;                              //initially we don't have a previous sample
-	myTimer.Start();
-	startTimer(0);
+    
+	myTimer.Start();                                    //start timer for position in song
+	startTimer(0);                                      //start Qt's timer with timeout of 0, allowing
+                                                        //  the timerEvent function to act as an idle function
 }
 
 void GLWidget::pauseSong()
-//POST: Widget is paused on the current frame
+// POST: Widget is paused on the current frame
 {
 	myTimer.Pause();	//stop the passage of time
 }
 
 void GLWidget::resumeSong()
-//POST: If the widget is paused, resumes the widget. Otherwise, starts the widget.
+// POST: If the widget is paused, resumes the widget. Otherwise, starts the widget.
 {
 	if (myTimer.Started())		//if we're paused,
 		myTimer.UnPause();		//resume the widget
@@ -45,7 +56,7 @@ void GLWidget::resumeSong()
 }
 
 void GLWidget::stopSong()
-//POST: Halts widget, stopping the timer and bringing us back to the first frame.
+// POST: Halts widget, stopping the timer and bringing us back to the first frame.
 {
 	myTimer.Stop();			  //stop the timer,
 	sampleNumber = 0;		  //reset to first sample
@@ -112,7 +123,7 @@ void GLWidget::resizeGL(int w, int h)
     glViewport(0, 0, w, h);
 }
 
-void GLWidget::paintGL()                                             //visualization of basic waveform
+void GLWidget::paintGL()                                             
 // POST: If audio has completed playing, nothing happens. Otherwise, the GL window is refreshed with a
 //       graphical representation of 256 samples of the audio representing 0.005 seconds of audio data from
 //       the time this method is called
@@ -157,34 +168,35 @@ void GLWidget::timerEvent(QTimerEvent *)
 //       the drawing started. If the audio is not over, lastSampleNumber is reset to this value of
 //       sampleNumber to be used in the next call and the animation is refereshed.
 {
-	if (myWave)
+	if (myWave)                                                                     //draw only when we have a song 
 	{
-		sampleNumber = myWave->GetSampleRate()*(myTimer.GetMilliSeconds()/1000.0);   //sample rate in samples/second
+		sampleNumber = myWave->GetSampleRate()*(myTimer.GetMilliSeconds()/1000.0);  //sample rate in samples/second
 																					//  mult. by current time in seconds
 																					//  gives which sample to display
-		sampleNumber -= (sampleNumber % (myWave->GetSampleRate()/FPS));              //adjust sample number to get the
+		sampleNumber -= (sampleNumber % (myWave->GetSampleRate()/FPS));             //adjust sample number to get the
 			                                                                        //  nearest sample we'll actually
 			                                                                        //  draw
-		if (sampleNumber+numSamples >= myWave->GetSamplesPerChannel())    //when we've passed the end of the song
-		{                                                                //quit the program.
-			stopSong();
-			emit songEnded();
+		if (sampleNumber+numSamples >= myWave->GetSamplesPerChannel())              //when we've passed the end of the song
+		{                                                                           //  stop drawing.
+			stopSong();                                                             //stop drawing here.
+			emit songEnded();                                                       //tell UI song is done.
 			return;
 		}
 
-		if (sampleNumber != lastSampleNumber)                   //if we're not repeating a frame, draw the next frame
-		{
-			emit timePassed(myTimer.GetMilliSeconds());
-			lastSampleNumber = sampleNumber;
-			update();
+		if (sampleNumber != lastSampleNumber)                                       //if we're not repeating a frame,
+		{                                                                           //  draw the next frame
+			emit timePassed(myTimer.GetMilliSeconds());                             //tell UI about time change for
+                                                                                    //  updating slider
+			lastSampleNumber = sampleNumber;                                        //advance previous sample
+			update();                                                               //draw new frame of visualization
 		}
 	}
 }
 
 void GLWidget::SetVisualization(int vis)
-// PRE:  Assigned(vis)
+// PRE:  0 <= vis <= LAST_VIS_CHOICE
 // POST: Visualization running changed: 0: Basic Wave, 1: Wavy Oceany Type Thing, 2: Camel Parade, 3: Blob,
-//       4: Blob plus Wave. When vis > 4, Basic Wave is displayed
+//       4: Blob plus Wave, 5. 3D Carpet, 6. 3D Surface. When vis > LAST_VIS_CHOICE, Basic Wave is displayed
 {
     visChoice = vis;                                            //Reset display function class member
     

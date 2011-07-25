@@ -1,3 +1,6 @@
+// GLWidget: Widget for visualizing sound data using OpenGL.
+// Summer 2009, Evan Fox and Doug Hogan
+
 #pragma once
 
 #include <QtOpenGL>
@@ -11,8 +14,7 @@
 #include <iomanip>
 using namespace std;
 
-
-#ifdef __APPLE__                                  //GLUT, SDL settings different on Apple
+#ifdef __APPLE__                                  //SDL settings different on Apple
 #include <SDL_mixer/SDL_mixer.h>
 #define FULL_SCREEN_STRING "1440x900:24@12"
 #define isApple true
@@ -20,12 +22,6 @@ using namespace std;
 #include <SDL/SDL_mixer.h>
 #define FULL_SCREEN_STRING "1360x768:24@12"
 #define isApple false
-#endif
-
-#ifdef _WIN32
-#define isWindows true
-#else
-#define isWindows false
 #endif
 
 
@@ -41,12 +37,25 @@ class GLWidget : public QGLWidget
 	
 public:
     GLWidget(QWidget* parent);
-    
+    // POST: GLWidget constructed, with line color set to medium blue, visualization set to basic 
+    //       waveform, and with widget able to handle keyboard and mouse events.
+            
 public slots:
 	void playNewSong(Wave* song);
+    // PRE:  song is initialized
+    // POST: GLWidget is set up to play song. numSamples is reset to allow for 0.005 seconds of data.
+    //         sampleNumber and lastSampleNumber are reset to start of song values, 0 and -1, respectively.
+    //         myTimer is started to allow visualization to synchronize with playback. Qt is set up so
+    //         timerEvent acts as an idle function. 
+    
 	void pauseSong();
-	void resumeSong();
-	void stopSong();
+	// POST: Widget is paused on the current frame
+    
+    void resumeSong();
+	// POST: If the widget is paused, resumes the widget. Otherwise, starts the widget.
+    
+    void stopSong();
+    // POST: Halts widget, stopping the timer and bringing us back to the first frame.
     
     void IncreaseRed();
     // POST: red component of color of visualization is increased by 5%
@@ -65,7 +74,11 @@ public slots:
 
 signals:
 	void songEnded();
+    // Emitted when there is no more sound data to draw.
+    
 	void timePassed(int curMilliSeconds);
+    // Emitted when the playback time is curMillSeconds milliseconds.
+
 
 protected:
     void initializeGL();
@@ -90,7 +103,7 @@ protected:
     //       sampleNumber to be used in the next call and the animation is refereshed.
 	
 	void SetVisualization(int vis);
-    // PRE:  Assigned(vis)
+    // PRE:  0 <= vis <= LAST_VIS_CHOICE
     // POST: Visualization running changed: 0: Basic Wave, 1: Wavy Oceany Type Thing, 2: Camel Parade, 3: Blob,
     //       4: Blob plus Wave. When vis > 4, Basic Wave is displayed
 	
@@ -140,6 +153,4 @@ private:
     void GLDisplayBlobPlusWave();                                        //4. "blob" from AS3 visualizer + Basic Waveform
     void GLDisplay3DCarpet();                                            //5. 3D Carpet
     void GLDisplay3DSurface();                                           //6. 3D Surface
-    
-
 };
