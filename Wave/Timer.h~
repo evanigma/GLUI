@@ -1,0 +1,20 @@
+#pragma once
+
+class Timer
+{
+public:
+    Timer();
+
+    int GetMilliSeconds();
+    void Start();
+    void Pause();
+    void UnPause();
+    void Stop();
+
+private:
+    bool isStarted;
+    bool isPaused;
+
+    int startTime;
+    int pausedTime;
+};
