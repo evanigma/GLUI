@@ -4,7 +4,6 @@
 
 #define curSong (playlist[curTrack].substr(0,playlist[curTrack].length()-3)+"wav").c_str()
 
-
     /*
      QMessageBox msgBox;
      msgBox.setText("Leaving");
@@ -16,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	setWindowIcon(QIcon(":/Icon/GLUI.png"));
 	glWindow = new GLWidget(0);
 	myPlayer = new Player(0);
+	playlistWidget = new QListWidget();
+	
 	myWave = NULL;
 	curTrack = -1;
 	numTracks = 0;
@@ -24,16 +25,34 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 	connect(this, SIGNAL(newSong(Wave*)), myPlayer, SLOT(playNewSong(Wave*)));
 	connect(this, SIGNAL(newSong(Wave*)), glWindow, SLOT(playNewSong(Wave*)));	
 	connect(glWindow, SIGNAL(songEnded()), this, SLOT(gotoNextSong()));
+	connect(playlistWidget, SIGNAL(currentRowChanged(int)), this, SLOT(listClicked(int)));
 	
+	createDock();	
 	createActions();
 	createMenus();
 	createToolBar();
+	//playlistDock->toggleViewAction()->trigger(); (This doesn't work for hiding playlist upon start)
 }
 
 MainWindow::~MainWindow()
 {
 	delete myWave;
 	myWave = NULL;
+}
+
+void MainWindow::createDock()
+{
+	playlistDock = new QDockWidget(tr("Playlist"), this);	//Create a new playlist dock
+	
+	playlistDock->setAllowedAreas(Qt::RightDockWidgetArea 	//Allow the playlist to be docked on the
+								| Qt::LeftDockWidgetArea);	//left and right
+								
+	playlistDock->toggleViewAction()->setIcon(style()		//Set the action corresponding to whether
+		        ->standardIcon(QStyle::SP_FileIcon));		//our dock is visible or not to have a
+		        											//list-like icon
+		        
+	playlistDock->setWidget(playlistWidget);				//attach the playlist to this dock
+	addDockWidget(Qt::RightDockWidgetArea, playlistDock);	//add the widget to our main window
 }
 
 void MainWindow::createActions()
@@ -90,10 +109,10 @@ void MainWindow::createActions()
     nextVisAct->setShortcut(tr("Ctrl+X"));
     connect(nextVisAct, SIGNAL(triggered()), glWindow, SLOT(NextVisualization()));
     
-    showPlaylistAct = new QAction(style()->standardIcon(QStyle::SP_FileIcon), "Show Play&list", this);
+    /*showPlaylistAct = new QAction(style()->standardIcon(QStyle::SP_FileIcon), "Show Play&list", this);
     showPlaylistAct->setShortcut(tr("Ctrl+L"));
     //showPlaylistAct->setStatusTip(tr("Displays the current playlist"));
-    connect(showPlaylistAct, SIGNAL(triggered()), this, SLOT(showPlaylist()));
+    connect(showPlaylistAct, SIGNAL(triggered()), this, SLOT(showPlaylist()));*/
     
     fullScreenAct = new QAction("&Fullscreen", this);
     fullScreenAct->setShortcut(tr("Ctrl+F"));
@@ -136,7 +155,8 @@ void MainWindow::createMenus()
     playlistMenu->addAction(repeatOneAct);
     playlistMenu->addAction(repeatAllAct);
     playlistMenu->addSeparator();
-    playlistMenu->addAction(showPlaylistAct);
+    //playlistMenu->addAction(showPlaylistAct);
+    playlistMenu->addAction(playlistDock->toggleViewAction());
     
     helpMenu = menuBar()->addMenu("&Help");
     helpMenu->addAction(aboutAct); 
@@ -161,7 +181,8 @@ void MainWindow::createToolBar()
 	controls->addAction(nextAct);
 	controls->addAction(stopAct);
 	controls->addWidget(slider);
-	controls->addAction(showPlaylistAct);
+	//controls->addAction(showPlaylistAct);
+	controls->addAction(playlistDock->toggleViewAction());
 	
 	controls->setMinimumHeight(40);
 	controls->setMovable(false);
@@ -169,6 +190,7 @@ void MainWindow::createToolBar()
 
 void MainWindow::open()
 {
+	playlistWidget->clear();
 	curTrack = -1;
 	numTracks = 0;
 
@@ -182,18 +204,19 @@ void MainWindow::addToPlaylist()
 	string extension = fileName.substr(fileName.length()-3, 3);
 	ifstream inFile;
 	
-	if (extension != "wav" && extension != "m3u" && extension != "mp3")
+	if (extension != "wav" && extension != "m3u" && extension != "mp3" && extension != "m4a")
 	{
-		QMessageBox msgBox(QMessageBox::Warning, "Invalid File", "Selected file is not of type .wav, .mp3, or .m3u");
+		QMessageBox msgBox(QMessageBox::Warning, "Invalid File", "Selected file is not of type .wav, .mp3, .m4a, or .m3u");
 		msgBox.exec();
 		return;
 	}
 	
-	if (extension == "mp3")
-		fileName = createWavOrMP3(fileName)+".mp3";
-	
-	if (extension == "wav" || extension == "mp3")
+	if (extension == "mp3" || extension == "m4a")
+		fileName = createWavOrMP3(fileName)+"."+extension;
+		
+	if (extension == "wav" || extension == "mp3" || extension == "m4a")
 	{
+		playlistWidget->addItem(QFileInfo(QString(fileName.c_str())).fileName());
 		if(numTracks == playlist.size())
 			playlist.push_back(fileName);
 		else
@@ -205,9 +228,10 @@ void MainWindow::addToPlaylist()
 		inFile.open(fileName.c_str());
 		while(getline(inFile, fileName))
 		{
+			playlistWidget->addItem(QFileInfo(QString(fileName.c_str())).fileName());
 			extension = fileName.substr(fileName.length()-3, 3);
-			if (extension == "mp3")
-				fileName = createWavOrMP3(fileName)+".mp3";
+			if (extension == "mp3" || extension == "m4a")
+				fileName = createWavOrMP3(fileName)+"."+extension;
 				
 			if(numTracks == playlist.size())
 				playlist.push_back(fileName);
@@ -222,7 +246,7 @@ void MainWindow::addToPlaylist()
 		gotoNextSong();	
 }
 
-void MainWindow::showPlaylist()
+/*void MainWindow::showPlaylist()
 {
      QMessageBox msgBox;
      string message;
@@ -245,7 +269,7 @@ void MainWindow::showPlaylist()
  	 
      msgBox.setText(message.c_str());
      msgBox.exec();
-}
+}*/
 
 void MainWindow::gotoPrevSong()
 {
@@ -257,6 +281,8 @@ void MainWindow::gotoPrevSong()
 		
 		if (curTrack < 0)
 			curTrack = numTracks-1;
+			
+		playlistWidget->setCurrentRow(curTrack);
 		
 		if (myWave)
 			delete myWave;
@@ -266,7 +292,7 @@ void MainWindow::gotoPrevSong()
 		
 		setWindowTitle(("GLUI - " + QFileInfo(QString(playlist[curTrack].c_str()))
 						.fileName().toStdString()).c_str());
-						
+		
 		emit newSong(myWave);
 	}
 	else
@@ -289,6 +315,8 @@ void MainWindow::gotoNextSong()
 		if (myWave)
 			delete myWave;
 			
+		playlistWidget->setCurrentRow(curTrack);
+			
 		myWave = new Wave(curSong);
 		slider->setRange(0, myWave->GetSongLength()*1000);
 		
@@ -299,6 +327,18 @@ void MainWindow::gotoNextSong()
 	}
 	else
 		curTrack = -1;	
+}
+
+void MainWindow::listClicked(int listNum)
+{
+	if (repeatOneAct->isChecked())	//if someone clicks on an item of the list, 
+		repeatOneAct->trigger();    //he/she doesn't want to repeat the current song
+		
+	if (curTrack != listNum)		//If the new list number isn't the track we're currently playing,
+	{
+		curTrack = listNum-1;		//switch the currently playing track to the one indicated by the
+		gotoNextSong();				//list number. (gotoNextSong increments curTrack).
+	}
 }
 
 void MainWindow::resumeTest()
@@ -323,7 +363,8 @@ void MainWindow::quit()
 	string cmd;
 	for (int i=0;  i < numTracks; i++)
 	{
-		if(playlist[i].substr(playlist[i].length()-3, 3) == "mp3")
+		if(playlist[i].substr(playlist[i].length()-3, 3) == "mp3" ||
+		   playlist[i].substr(playlist[i].length()-3, 3) == "m4a")
 		{
 			cmd = "rm -f \"" + playlist[i].substr(0,playlist[i].length()-3) + "wav\"";
 			system(cmd.c_str());
@@ -338,6 +379,8 @@ void MainWindow::fullScreen()
 {
 	if (fullScreenAct->isChecked())
 	{
+		if (playlistDock->toggleViewAction()->isChecked())	//if the playlist is visible,
+			playlistDock->toggleViewAction()->trigger();	//hide it.
 		controls->hide();               // hide the toolbar
 		//menuBar()->hide();			//this doesn't work
 		setCursor(Qt::BlankCursor);
@@ -379,9 +422,9 @@ string MainWindow::createWavOrMP3(string fileName)
 	string extension = fileName.substr(fileName.length()-3, 3);
 	string cmd;
 	
-    if(extension == "mp3")
+    if(extension == "mp3" || extension == "m4a")
     {
-        cout << "Converting mp3 to wav temporarily..." << endl;
+        cout << "Converting mp3/m4a to wav temporarily..." << endl;
 
         cmd = "ffmpeg -y -i \"" + fileName
                   + "\" -acodec pcm_s16le \"" + fileBase + ".wav\"";

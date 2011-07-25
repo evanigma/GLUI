@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 
 	MainWindow test(0);
 	
-	test.resize(600,450);
+	test.resize(750,450);
 	
 	test.show();
 	

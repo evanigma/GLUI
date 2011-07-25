@@ -18,7 +18,8 @@ public:
 public slots:
 	void open();
 	void addToPlaylist();
-	void showPlaylist();
+	//void showPlaylist();
+	void listClicked(int listNum);		//Handler for when playlist item is clicked
 	void quit();
 	
 	void resumeTest();
@@ -36,6 +37,7 @@ protected:
 	void contextMenuEvent(QContextMenuEvent* event);
 	
 private:
+	void createDock();
 	void createActions();
     void createMenus();
     void createToolBar();
@@ -61,6 +63,9 @@ private:
     QMenu* visMenu;
     QMenu* playlistMenu;
     QMenu* helpMenu;
+    
+    QDockWidget* playlistDock;
+    QListWidget* playlistWidget;
 
 	//Actions
 	QAction* openAct;
@@ -81,7 +86,7 @@ private:
     QAction* nextVisAct;
     QAction* prevVisAct; 
     
-    QAction* showPlaylistAct;
+    //QAction* showPlaylistAct;
     
     QAction* fullScreenAct; 
     
