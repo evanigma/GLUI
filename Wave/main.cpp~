@@ -1,0 +1,11 @@
+#include "Utility.h"
+#include <iostream>
+using namespace std;
+
+int main()
+{
+	colorSwatch myCS(200, 201, 202);
+	
+	cout << myCS.h << endl;
+	return 0;
+}

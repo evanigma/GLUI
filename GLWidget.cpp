@@ -2,8 +2,10 @@
 // Summer 2009, Evan Fox and Doug Hogan
 
 #include "GLWidget.h"
+#include "Utility.h"
 #include <math.h>
 #include <iostream>
+#include <complex>
 using namespace std; 
 
 GLWidget::GLWidget(QWidget* parent) : QGLWidget(parent)
@@ -155,6 +157,9 @@ void GLWidget::paintGL()
             case 6:
                 GLDisplay3DSurface();
                 break;
+            case 7:
+            	GLDisplayDFT();
+            	break;
             default:
                 GLDisplayBasicWave();
         }
@@ -579,6 +584,49 @@ void GLWidget::GLDisplay3DSurface()                                 //6. 3D Surf
             SurfaceVertex(i+1,j+1);
             glEnd();
         }
+    }
+}
+
+void GLWidget::GLDisplayDFT()                                     //7. visualization of the DFT of the waveform
+// POST: If audio has completed playing, nothing happens. Otherwise, the GL window is refreshed with a
+//       graphical representation of ~256 samples (depending on sample rate) of the audio representing 
+//       0.005 seconds of audio data from the time this method is called
+{
+    glLineWidth(3.0);                                                   //set line width to 3 pixels
+    glColor3f(red, green, blue);
+    vector<complex<double> > input;
+    vector<complex<double> > output;
+    vector<double>	frequencies;
+    double max = 0;
+    
+    if (log(numSamples)/log(2.0) - floor(log(numSamples)/log(2)) >= 0.0001)
+    {
+    	visChoice++;
+		SetVisualization(visChoice);
+		return;
+	}
+    
+    for (int i=0; i < numSamples; i++)
+    	input.push_back(complex<double>((*myWave)[0][sampleNumber+/*myWave->GetSampleRate()/11025**/i], 0.0));
+    	
+	output = Utility::FFT(input);
+	
+	for (int i=0; i < numSamples/2; i++)
+	{
+		frequencies.push_back(sqrt(pow(output[i].real(),2.0)+pow(output[i].imag(),2.0)));
+		if (frequencies[i] > max)
+			max = frequencies[i];
+	}
+	
+	for (int i=0; i < numSamples/2; i++)
+		frequencies[i] /= max;     
+                                          
+    for (int i=1; i<numSamples/2; i++)
+    {
+    	glBegin(GL_LINE_STRIP);                      
+        glVertex2i(i*FRAME_WIDTH*2/numSamples, 0);
+        glVertex2i(i*FRAME_WIDTH*2/numSamples, frequencies[i]*FRAME_HEIGHT);                           
+    	glEnd();
     }
 }
 

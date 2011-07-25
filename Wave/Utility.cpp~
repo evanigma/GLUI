@@ -15,6 +15,20 @@
 
 using namespace std;
 
+struct colorSwatch
+{
+	colorSwatch(int r, int g, int b)
+	{
+		h = r;
+		s = g;
+		v = b;
+	}
+	
+	int h;
+	int s;
+	int v;
+};
+
 int Utility::Power(int a, int b)
 {
     int toReturn = 1;
@@ -277,38 +291,3 @@ string Utility::StringFromDouble(double x)
          + StringFromInt(fractionalPart);
 }
 
-vector<complex<double> > Utility::FFT(const vector<complex<double> >& input)
-{
-	int n = input.size();		   			//number of elements in our data vector
-	vector<complex<double> > even;			//stores the even-index elements of input
-	vector<complex<double> > odd;			//stores the odd-index elements of input
-	complex<double> Wn(cos(2.0*M_PI/n),	    //each element of our basis is (e^(-2*Pi*i))^k(n)
-					   sin(2.0*M_PI/n));	//this is a convenient representation of the above exponent's base
-	complex<double> basis_k(1.0, 0.0);		//holds each of the k basis vectors
-	vector<complex<double> > output;			//the DFT of our data
-	vector<complex<double> > output_1stHalf;	//first half of output (needed for divide and conquer strategy)
-	vector<complex<double> > output_2ndHalf; //second half of output (needed for divide and conquer strategy)
-	
-	if (n == 1)								//base case
-		return input;
-		
-	for (int i=0; i < n/2; i++)				//separate input into odds and evens (divide and conquer)
-	{
-		even.push_back(input[2*i]);
-		odd.push_back(input[2*i+1]);
-	}
-	
-	output_1stHalf = FFT(even);				//Transform the even half (recursively)
-	output_2ndHalf = FFT(odd);				//Transform the odd half (recursively)
-	
-	output.resize(n);
-		
-	for (int k=0; k < n/2; k++)				//"Butterfly" each pair of k and k+N/2 elements...
-	{
-		output[k] = output_1stHalf[k] + basis_k*output_2ndHalf[k];
-		output[k+n/2] = output_1stHalf[k] - basis_k*output_2ndHalf[k];
-		basis_k *= Wn;
-	}
-	
-	return output;
-}

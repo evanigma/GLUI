@@ -28,7 +28,7 @@ using namespace std;
 const GLint FRAME_WIDTH = 720;           //width of display window in pixels (but it can be resized easily)
 const GLint FRAME_HEIGHT = 450;          //height of display window in pixels
 const int FPS = 12;						 //how many frames of visualization to use per second
-const int LAST_VIS_CHOICE = 6;           //index of the last visualization ID we have defined
+const int LAST_VIS_CHOICE = 7;           //index of the last visualization ID we have defined
 
  
 class GLWidget : public QGLWidget
@@ -153,4 +153,5 @@ private:
     void GLDisplayBlobPlusWave();                                        //4. "blob" from AS3 visualizer + Basic Waveform
     void GLDisplay3DCarpet();                                            //5. 3D Carpet
     void GLDisplay3DSurface();                                           //6. 3D Surface
+    void GLDisplayDFT();												 //7. DFT of the basic waveform
 };

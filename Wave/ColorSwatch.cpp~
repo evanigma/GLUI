@@ -1,0 +1,6 @@
+#include "ColorSwatch.h"
+
+ColorSwatch::ColorSwatch(int c1, int c2, int c3, int colorMode)
+{
+	r = a
+}

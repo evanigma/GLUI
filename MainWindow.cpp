@@ -68,6 +68,8 @@ void MainWindow::createDock()
 	playlistDock->toggleViewAction()->setIcon(style()		//Set the action corresponding to whether
 		        ->standardIcon(QStyle::SP_FileIcon));		//our dock is visible or not to have a
 		        											//list-like icon
+	
+	playlistDock->toggleViewAction()->setShortcut(tr("Ctrl+P")); //Set the action's shortcut
 		        
 	playlistDock->setWidget(playlistWidget);				//attach the playlist to this dock
 	addDockWidget(Qt::RightDockWidgetArea, playlistDock);	//add the widget to our main window

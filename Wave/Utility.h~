@@ -1,9 +1,21 @@
 #pragma once
 #include <string>
 #include <ostream>
-#include <complex>
-#include <vector>
 using namespace std;
+
+struct colorSwatch
+{
+	colorSwatch(int r, int g, int b)
+	{
+		h = r;
+		s = g;
+		v = b;
+	}
+	
+	int h;
+	int s;
+	int v;
+};
 
 class Utility
 {
@@ -22,5 +34,4 @@ public:
     static string StringFromInt(int x);
     static int NumDecimals(double x);
     static string StringFromDouble(double x);
-    static vector<complex<double> > FFT(const vector<complex<double> >& input);
 };
