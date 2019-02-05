@@ -3,6 +3,7 @@
 
 #include "GLWidget.h"
 #include "Utility.h"
+#include <GL/glut.h>
 #include <math.h>
 #include <iostream>
 #include <complex>

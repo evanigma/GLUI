@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = 
+TARGET = GLUI
 DEPENDPATH += . Wave
 INCLUDEPATH += . Wave
 
@@ -33,4 +33,4 @@ SOURCES += GLWidget.cpp \
            Wave/Wave.cpp
 RESOURCES += GLUI.qrc
 QT += opengl
-LIBS += -lSDL -lSDL_mixer
+LIBS += -lSDL -lSDL_mixer -lglut -lGLU
