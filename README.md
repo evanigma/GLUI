@@ -1,6 +1,8 @@
-# GLUI - Summer 2009
-#### Evan Fox and Doug Hogan
+# GLUI 
+### Music Player with an OpenGL User Interface
 
+
+#### Installation
 A debian package is provided in the binary/ directory.
 To install: `sudo dpkg -i glui*.deb`
 
@@ -15,6 +17,8 @@ Depends:
 * libqt5core5a
 * libqt5gui5
 * libqt5opengl5
+
+#### Building
 
 To build, additionally depends:
 * libsdl1.2-dev
@@ -42,3 +46,6 @@ LIBS += -lSDL -lSDL_mixer -lglut -lGLU
 ```
 
 to the bottom of the file
+
+
+Created Summer 2009 by Evan Fox and Doug Hogan

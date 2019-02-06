@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=GLUI
+Comment=Music Player with an Open GL User Interface
+Exec=GLUI
+Icon=GLUI
+Categories=Music;Qt
+Type=Application
+Version=1.0

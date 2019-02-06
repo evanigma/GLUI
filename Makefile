@@ -529,9 +529,13 @@ moc_Player.o: moc_Player.cpp
 
 install: 
 	cp ./GLUI /usr/bin/
+	cp ./Icon/GLUI.desktop /usr/share/applications/
+	cp ./Icon/GLUI.png /usr/share/icons/hicolor/96x96/apps/
 
 uninstall:  
 	rm /usr/bin/GLUI
+	rm /usr/share/applications/GLUI.desktop
+	rm /usr/share/icons/hicolor/96x96/apps/GLUI.png
 
 FORCE:
 
